@@ -1,0 +1,27 @@
+pipeline{
+	agent {
+	label 'Master'				// declares the agent node you wish to use. it could be "any" or the specific agent label
+	}			
+	tools{
+	maven 'maven3.9.1'
+	}
+	//options{}
+	//triggers{}
+	stages{
+		stage('1clone'){
+		    steps{
+			sh "echo 'cloning repo'"
+			git credentialsId: 'WilliLeFou', url: 'https://github.com/pakuega/tesla-app.git'
+			sh "echo 'ready for testing'"
+		    }
+		}
+		stage('2build'){
+		    steps{
+			sh "echo 'testing and building'"
+			sh "mvn clean package"
+			sh "echo 'ready for Code Quality analysis'"
+		    }
+		}
+	}
+	//post{see sublime text notes for more}
+}
