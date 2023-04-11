@@ -1,0 +1,24 @@
+node{
+    def mvnhome = tool name : 'maven3.9.1'
+    stage('1clone'){
+        git credentialsId: 'WilliLeFou', url: 'https://github.com/pakuega/tesla-app.git'   
+    }
+    stage('2Build'){
+        sh "${mvnhome}/bin/mvn clean package"
+    }
+    stage('3CQAnalysis'){
+        sh "${mvnhome}/bin/mvn sonar:sonar"
+    }
+    stage('4deploytoartifactory'){
+        sh "${mvnhome}/bin/mvn deploy"
+    }
+    stage('5deploytoUAT'){
+        deploy adapters: [tomcat9(credentialsId: '7ce998d2-d3a7-4dad-aa41-b8c4ecdced40', path: '', url: 'http://100.25.171.53:8080/')], contextPath: null, war: 'target/*war'
+    }
+    stage('6ManualApproval'){
+        sh "echo 'ready for review'"
+	timeout(time:5, unit:'HOURS'){
+	input message: 'Application ready for deployment. Please review and approve'
+	}
+    }
+}
